@@ -1,0 +1,118 @@
+---
+title: "Ejemplo de uso de ggplot2 y plotly"
+author: "Erik Seras"
+date: "25/6/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+> "El gráfico simple ha traído más información a la mente del analista de datos que cualquier otro mecanismo"
+>
+> --- [John Tukey](https://en.wikipedia.org/wiki/John_Tukey "Bibliografía")
+
+## Plantear la pregunta
+
+El paso inicial más importante en la Ciencia de Datos es la pregunta.
+
+Un ejemplo de esto sería la siguiente pregunta: ¿Los autos con un motor más grande consumen más combustible que los autos con motor más pequeño?
+
+Teniendo esta inquietud, lo siguiente es buscar data disponible que permita el absolver tal questión. Para este caso se usará el dataset de ggplot2 mediante ```ggplot2::mpg```.
+
+
+
+```{r}
+## Vista reducida del dataset
+knitr::kable(
+  head(ggplot2::mpg, 10), booktabs = TRUE,
+  caption = 'Tabla de las primeras 10 líneas de la data mtcars.'
+)
+```
+Si se requiere averiguar más infromación del dataset escribir ```?ggplot2::mpg```; y si ya cargó la librería, solo escribir ```?mpg``` en el script y presionar ```CTRL + ENTER```.
+
+Para resolver la pregunta inicial, se trabajará con la variable tamaño del motor del auto en litros ```displ``` y las [millas](https://es.wikipedia.org/wiki/Milla "1 milla estatutaria = 1609,344 metros") de carretera por [galón](https://es.wikipedia.org/wiki/Gal%C3%B3n "3.785411784 litros (USgal)") ```hwy```.
+
+## Carga de librerías
+
+Estas librerías serán necesarias para el presente ejemplo.
+
+```{r message=FALSE}
+## R version 4.0.2 (2020-06-22)
+
+## Cargar lobrería
+## install.packages("tidyverse")
+library(tidyverse)  ## 1.3.0
+## Para hacer gráficos dinámicos
+## install.packages("tidyverse")
+library(plotly)     ## 4.9.2.1
+
+```
+
+## Generación de gráficos
+
+Una forma de buscar una respuesta a la inquietud inicial es el obervar una gráfico y entender cómo se comportan las variables a estudiar.
+
+```{r}
+## Creación del gráfico de dispersión con dos variables
+ggplot(data = mpg) +
+        geom_point(mapping = aes(x = displ, y = hwy), color = "red") +
+        labs(title = "Recorrido por galón vs. tamaño del motor",
+             x ="Tamaño del motor (l)", y = "Recorrido por galón (mi/gal)") +
+        theme_bw()
+      
+
+```
+
+La gráfica muestra una relación negativa entre el tamaño de motor y las millas de carretera por hora. Es decir, un motor con gran tamaño va a tener una eficiencia menor de recorrido por cada galón de combustible. Este enunciado estaría respondiendo a la pregunta inicial.
+
+El siguiente gráfico es una forma de hacer el mismo gráfico pero de una forma dinámica, en el cual el lector pueda interactuar. Esto se logra con la ayuda de la librería ```plotly```. En el que se adiciona el número de cilindros del motor y son representados mediante diferentes símbolos en vez puntos.
+
+```{r message=FALSE, warning=FALSE}
+
+## Gráfico dinámico
+plot_ly(mpg, x = ~displ, y = ~hwy, type = "scatter", mode = "markers",
+        symbol = ~factor(cyl)) %>% 
+        layout(title = "Recorrido por galón vs. tamaño del motor",
+               xaxis = list(title = "Tamaño del motor (l)"), 
+               yaxis = list(title = "Recorrido por galón (mi/gal)"))
+```
+
+Una variable que puede afectar a tal relación de las dos variables sería la clase de auto ```class```. Esta variable se puede adicionar mediante colores a los puntos de gráfico 2D y de esa manera poder diferenciarlos.
+
+```{r message=FALSE}
+## Creación de un gráfico con 3 variables
+
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy, color = class))  +
+  labs(title = "Recorrido por galón vs. tamaño del motor",
+       x ="Tamaño del motor (l)", y = "Recorrido por galón (mi/gal)",
+       colour = "Tipo de auto") +
+  theme_bw()
+
+```
+
+También se puede hacer de forma dinámica.
+
+```{r message=FALSE}
+
+## Gráfico dinámico
+plot_ly(mpg, x = ~displ, y = ~hwy, type = "scatter", mode = "markers",
+        color = ~class, colors = "Set1") %>% 
+        layout(title = "Recorrido por galón vs. tamaño del motor",
+               xaxis = list(title = "Tamaño del motor (l)"), 
+               yaxis = list(title = "Recorrido por galón (mi/gal)"))
+```
+
+Con las gráficas anteriores, se puede dar una respuesta a la pregunta: "Los autos con un motor más grande si consumen más combustible que los autos con motor más pequeño. Es decir, los autos con mayor tamaño de motor tienen un menor recorrido por cada galón usado. Y que la relación entre etas dos variables es negativa".
+
+Aun faltaría ver su magnitud y su significancia de la relación de las dos variables, y otras muchas cuestiones que se pueden realizar; pero por ahora es suficiente ya que se respondió la pregunta, y este ejemplo sirió para poder mostrar la forma estática y dinámica de la visualización de datos.
+
+Libros que ayudaron como guía para la elaboración de este ejemplo:
+
+* [Interactive web-based data visualization with R, plotly, and shiny](https://plotly-r.com/index.html "De Carson Sievert")
+* [R for Data Science](https://r4ds.had.co.nz/index.html "De Garrett Grolemund y Hadley Wickham")
+
+
